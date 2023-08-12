@@ -1,26 +1,7 @@
 const { parse } = require("node-html-parser");
 
+// language=css
 const FONT_FACE_ROBOTO = `
-@font-face {
-  font-family: "Roboto";
-  src:
-    local("Roboto Thin"),
-    local("Roboto-Thin"),
-    url(https://home.mei-raid.synology.me/static/fonts/roboto/Roboto-Thin.woff2) format("woff2");
-  font-weight: 100;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "Roboto";
-  src:
-    local("Roboto Light"),
-    local("Roboto-Light"),
-    url(https://home.mei-raid.synology.me/static/fonts/roboto/Roboto-Light.woff2) format("woff2");
-  font-weight: 300;
-  font-style: normal;
-}
-
 @font-face {
   font-family: "Roboto";
   src:
@@ -50,16 +31,6 @@ const FONT_FACE_ROBOTO = `
   font-weight: 700;
   font-style: normal;
 }
-
-@font-face {
-  font-family: "Roboto";
-  src:
-    local("Roboto Black"),
-    local("Roboto-Black"),
-    url(https://home.mei-raid.synology.me/static/fonts/roboto/Roboto-Black.woff2) format("woff2");
-  font-weight: 900;
-  font-style: normal;
-}
 `;
 
 module.exports = function modifyContent(data) {
@@ -84,14 +55,10 @@ module.exports = function modifyContent(data) {
 <body class="bergfix">
   <style>
     ${FONT_FACE_ROBOTO}
-    
+
     body.bergfix {
-      font-family: Roboto!important;
+      font-family: Roboto !important;
       letter-spacing: initial;
-    }
-    
-    svg {
-      display: none;
     }
     
     #clock {
@@ -99,42 +66,83 @@ module.exports = function modifyContent(data) {
       font-weight: normal;
     }
     
-    .forecast1h {
-      position: relative;
-      left: 11px;
+    svg,
+    .forecast1h .time:last-child,
+    .forecast9d-container .fields:last-of-type,
+    /* hide percentage */
+    .day>:nth-child(4),
+    /* hide 9th day */
+    .time:nth-child(9),
+    .day:nth-child(9),
+    .ff,
+    .rrp {
+      display: none;
     }
     
-    .forecast1h .time .label, .forecast9d-container .day .date {
+    .forecast1h {
+      width: auto;
+      margin: 0 0 4px;
+    }
+    
+    .forecast1h .time .label,
+    .forecast9d-container .day .date {
       font-weight: 500;
       font-size: 12px;
     }
     
     .forecast1h .icon {
       margin: -2px 0 0 -3px;
-      left: 0;
-      visibility: visible!important;
+      visibility: visible !important;
     }
     
     .forecast1h .temperature {
       margin-top: -16px;
     }
     
-    .forecast1h .temperature, .fields .tmax, .day .sonne {
+    .forecast1h .rrr {
+      /* avoid layout shift when rain is present */
+      height: 21px;
+    }
+    
+    .forecast1h .temperature,
+    .fields .tmax {
       font-weight: 500;
+    }
+    
+    .forecast1h .temperature,
+    .fields .tmax,
+    .day .rrr,
+    .day .sonne {
       font-size: 13px;
     }
     
-    .day .rrr {
-      font-size: 13px;
+    .forecast1h .icon,
+    .forecast1h .rrr {
+      left: 0;
     }
     
-    .forecast9d-container .fields.trend, .forecast9d-container .fields {
+    /* 1/8 */
+    .forecast1h .time,
+    .forecast9d-container .fields {
+      width: 12.5%;
+    }
+    
+    .forecast9d-container .fields.trend,
+    .forecast9d-container .fields {
       background-image: none;
     }
     
+    .fields > div {
+      border: none;
+    }
+    
+    .fields .tmin,
+    .fields .sonne {
+      font-weight: 400;
+    }
+    
     .fields .tmin {
-      font-weight: normal;
-      margin-top: -4px
+      margin-top: -4px;
     }
     
     .day .group {
@@ -142,15 +150,21 @@ module.exports = function modifyContent(data) {
     }
     
     /* move temperature */
-    .day>:nth-child(3){
+    .day > :nth-child(3) {
       margin-top: -18px;
-      padding-bottom: 6px;
+      padding-bottom: 4px;
     }
     
-    /* hide percentage */
-    .day>:nth-child(4) {
-      display: none;
+    /* swap sun hours and rain */
+    .day > :nth-child(5) {
+      display: flex;
+      flex-direction: column-reverse;
     }
+    
+    .touch-scroll-x {
+      overflow: hidden;
+    }
+
   </style>
   <h1 id="clock"></h1>
   <script>
@@ -161,7 +175,6 @@ module.exports = function modifyContent(data) {
     , 1000)
   </script>
   ${oneHour.toString()}
-  <div style="height: 16px"></div>
   ${nineDays.toString()}
 </body>`
   );
@@ -174,6 +187,10 @@ module.exports = function modifyContent(data) {
     .replace("Freitag", "Fr")
     .replace("Samstag", "Sa")
     .replace("Sonntag", "So");
+
+  // remove hardcoded width
+  result = result.replace(/ style="width: 495px"/, "");
+  result = result.replace(/ style="width: 504px;"/, "");
 
   return result;
 };
