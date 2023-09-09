@@ -33,7 +33,7 @@ const FONT_FACE_ROBOTO = `
 }
 `;
 
-module.exports = function modifyContent(data) {
+module.exports = function modifyContent(data, showClock) {
   let result = data.toString();
   const parsed = parse(result);
 
@@ -59,11 +59,16 @@ module.exports = function modifyContent(data) {
     body.bergfix {
       font-family: Roboto !important;
       letter-spacing: initial;
+      min-height: initial;
     }
     
     #clock {
       margin: 24px;
       font-weight: normal;
+    }
+   
+    #clock:empty {
+      margin: 8px;
     }
     
     svg,
@@ -167,6 +172,7 @@ module.exports = function modifyContent(data) {
 
   </style>
   <h1 id="clock"></h1>
+  ${showClock ? `
   <script>
     setInterval(() =>
       document
@@ -174,6 +180,7 @@ module.exports = function modifyContent(data) {
         .textContent = new Date().toLocaleString("de-DE", {weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric"}).replace(" um ", ", ")
     , 1000)
   </script>
+  ` : ""}
   ${oneHour.toString()}
   ${nineDays.toString()}
 </body>`
