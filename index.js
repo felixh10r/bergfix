@@ -15,7 +15,7 @@ const getMimeType = (url) => {
 };
 
 app.get("/", (req, res) => {
-  const { url, clock } = req.query; // get url parameter
+  const { url, clock, zoom, greyscale } = req.query; // get url parameter
   if (!url) {
     res.type("text/html");
     return res.end("You need to specify <code>url</code> query parameter");
@@ -27,7 +27,7 @@ app.get("/", (req, res) => {
       const urlMime = getMimeType(url); // get mime type of the requested url
 
       if (urlMime === "text/html") {
-        data = modifyContent(data.toString(), !!clock);
+        data = modifyContent(data.toString(), { clock, zoom, greyscale });
       }
 
       res.type(urlMime);

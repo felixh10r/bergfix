@@ -33,7 +33,7 @@ const FONT_FACE_ROBOTO = `
 }
 `;
 
-module.exports = function modifyContent(data, showClock) {
+module.exports = function modifyContent(data, options) {
   let result = data.toString();
   const parsed = parse(result);
 
@@ -49,6 +49,7 @@ module.exports = function modifyContent(data, showClock) {
   // remove external scripts
   result = result.replace(/<script(.*) src="http(.*)>/g, "");
 
+  // language=CSS
   result = result.replace(
     /<body(.*)<\/body>/s,
     `
@@ -78,10 +79,52 @@ module.exports = function modifyContent(data, showClock) {
     .day>:nth-child(4),
     /* hide 9th day */
     .time:nth-child(9),
-    .day:nth-child(9),
-    .ff,
-    .rrp {
+    .day:nth-child(9) {
       display: none;
+    }
+    
+    ${
+      options.zoom
+        ? `
+html {
+  zoom: ${options.zoom}%;
+}
+    `
+        : ""
+    }
+    
+    ${
+      options.showClock
+        ? `
+.ff, .rrp {
+  display: none;
+}
+    `
+        : ""
+    }
+    
+    ${
+      options.greyscale
+        ? `
+.bergfix .fields .tmin, .bergfix .fields .tmax, .bergfix .temperature {
+  color: black;
+}
+
+img {
+    filter: grayscale(100%) invert(100%) contrast(145%) brightness(146%);
+}
+    `
+        : ""
+    }
+    
+    ${
+      options.showClock
+        ? `
+.ff, .rrp {
+  display: none;
+}
+    `
+        : ""
     }
     
     .forecast1h {
@@ -163,7 +206,16 @@ module.exports = function modifyContent(data, showClock) {
     /* swap sun hours and rain */
     .day > :nth-child(5) {
       display: flex;
-      flex-direction: column-reverse;
+      flex-direction: column;
+    }   
+    .day .sonne {
+      order: 1;
+    }
+    .day .rrr {
+      order: 2;
+    }
+    .day .ff {
+      order: 3;
     }
     
     .touch-scroll-x {
@@ -172,7 +224,9 @@ module.exports = function modifyContent(data, showClock) {
 
   </style>
   <h1 id="clock"></h1>
-  ${showClock ? `
+  ${
+    options.showClock
+      ? `
   <script>
     setInterval(() =>
       document
@@ -180,7 +234,9 @@ module.exports = function modifyContent(data, showClock) {
         .textContent = new Date().toLocaleString("de-DE", {weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric"}).replace(" um ", ", ")
     , 1000)
   </script>
-  ` : ""}
+  `
+      : ""
+  }
   ${oneHour.toString()}
   ${nineDays.toString()}
 </body>`
