@@ -1,36 +1,29 @@
 const express = require("express");
 const axios = require("axios");
-const mime = require("mime");
 const modifyContent = require("./modifyContent");
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-const getMimeType = (url) => {
-  if (url.indexOf("?") !== -1) {
-    // remove url query so we can have a clean extension
-    url = url.split("?")[0];
-  }
-  return mime.getType(url) || "text/html"; // if there is no extension return as html
-};
-
 app.get("/", (req, res) => {
-  const { url, clock, zoom, greyscale } = req.query; // get url parameter
-  if (!url) {
+  const { path, greyscale, showClock, showDetails, zoom, numCols } = req.query; // get url parameter
+  if (!path) {
     res.type("text/html");
-    return res.end("You need to specify <code>url</code> query parameter");
+    return res.end("You need to specify <code>path</code> query parameter");
   }
 
   axios
-    .get(url, { responseType: "arraybuffer" }) // set response type array buffer to access raw data
+    .get(`https://www.bergfex.at${path}`, { responseType: "arraybuffer" }) // set response type array buffer to access raw data
     .then(({ data }) => {
-      const urlMime = getMimeType(url); // get mime type of the requested url
+      data = modifyContent(data.toString(), {
+        showClock,
+        showDetails,
+        zoom,
+        greyscale,
+        numCols,
+      });
 
-      if (urlMime === "text/html") {
-        data = modifyContent(data.toString(), { clock, zoom, greyscale });
-      }
-
-      res.type(urlMime);
+      res.type("text/html");
       res.send(data);
     })
     .catch((error) => {

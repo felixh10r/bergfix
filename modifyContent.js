@@ -43,6 +43,8 @@ module.exports = function modifyContent(data, options) {
     return data;
   }
 
+  const numCols = options.numCols ?? 8;
+
   oneHour.querySelector(".timeline").remove();
   const nineDays = parsed.querySelector(".forecast9d-container");
 
@@ -53,7 +55,7 @@ module.exports = function modifyContent(data, options) {
   result = result.replace(
     /<body(.*)<\/body>/s,
     `
-<body class="bergfix">
+<body class="bergfix cols-${numCols}">
   <style>
     ${FONT_FACE_ROBOTO}
 
@@ -83,6 +85,13 @@ module.exports = function modifyContent(data, options) {
       display: none;
     }
     
+    .cols-6 .time:nth-child(7),
+    .cols-6 .day:nth-child(7),
+    .cols-6 .time:nth-child(8), 
+    .cols-6 .day:nth-child(8) {
+      display: none;
+    }
+    
     ${
       options.zoom
         ? `
@@ -94,37 +103,37 @@ html {
     }
     
     ${
-      options.showClock
-        ? `
+      options.showDetails
+        ? ""
+        : `
 .ff, .rrp {
   display: none;
 }
     `
-        : ""
     }
     
     ${
       options.greyscale
         ? `
-.bergfix .fields .tmin, .bergfix .fields .tmax, .bergfix .temperature {
+.bergfix .fields .tmin, .bergfix .fields .tmax, .bergfix .temperature,  .bergfix .rrp {
   color: black;
 }
 
 img {
-    filter: grayscale(100%) invert(100%) contrast(145%) brightness(146%);
+    filter: grayscale(100%) contrast(160%) brightness(80%);
 }
     `
         : ""
     }
     
     ${
-      options.showClock
-        ? `
+      options.showDetails
+        ? ""
+        : `
 .ff, .rrp {
   display: none;
 }
     `
-        : ""
     }
     
     .forecast1h {
@@ -165,7 +174,8 @@ img {
     }
     
     .forecast1h .icon,
-    .forecast1h .rrr {
+    .forecast1h .rrr,
+    .forecast1h .rrp {
       left: 0;
     }
     
@@ -173,6 +183,12 @@ img {
     .forecast1h .time,
     .forecast9d-container .fields {
       width: 12.5%;
+    }
+    
+    /* 1/6 */
+    .cols-6 .forecast1h .time,
+    .cols-6 .forecast9d-container .fields {
+      width: 16.666%;
     }
     
     .forecast9d-container .fields.trend,
@@ -207,7 +223,7 @@ img {
     .day > :nth-child(5) {
       display: flex;
       flex-direction: column;
-    }   
+    }
     .day .sonne {
       order: 1;
     }
