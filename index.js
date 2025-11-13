@@ -6,18 +6,16 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.get("/", (req, res) => {
-  const { path, greyscale, showClock, showDetails, zoom, numCols } = req.query; // get url parameter
+  const { path, greyscale, zoom, numCols } = req.query; // get url parameter
   if (!path) {
     res.type("text/html");
     return res.end("You need to specify <code>path</code> query parameter");
   }
 
   axios
-    .get(`https://www.bergfex.at${path}`, { responseType: "arraybuffer" }) // set response type array buffer to access raw data
+    .get(`https://www.bergfex.at${path}`, { responseType: "text" })
     .then(({ data }) => {
-      data = modifyContent(data.toString(), {
-        showClock,
-        showDetails,
+      data = modifyContent(data, {
         zoom,
         greyscale,
         numCols,
